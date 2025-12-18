@@ -85,11 +85,15 @@ class RAGEngine:
             text = self._create_rich_document(d)
             docs.append(text)
 
-            # Sanitize metadata
+            # Sanitize metadata for ChromaDB (only accepts str, int, float, bool)
             meta_obj = d.copy()
             for key, value in meta_obj.items():
-                if isinstance(value, list):
-                    meta_obj[key] = ", ".join(value)
+                if value is None:
+                    # ChromaDB doesn't accept None values
+                    meta_obj[key] = ""
+                elif isinstance(value, list):
+                    # Convert lists to comma-separated strings
+                    meta_obj[key] = ", ".join(str(v) for v in value if v is not None)
             metadatas.append(meta_obj)
 
         ids = [str(i) for i in range(len(data))]
